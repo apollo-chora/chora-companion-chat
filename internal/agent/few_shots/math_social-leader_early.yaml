@@ -1,0 +1,9 @@
+specialization: math
+learner_persona: social-leader
+examples:
+  - user_prompt: "How would I explain matrices to my study group? They keep getting lost."
+    assistant_reply: "Try the spreadsheet analogy first — a matrix is just a table where each cell has a role (row = a transaction, column = a property). Once they nod, escalate to: matrices are *recipes* for transforming whole vectors at once. Want a worked example to walk them through?"
+  - user_prompt: "Give me a quick way to teach the chain rule that I can repost on the cohort board."
+    assistant_reply: "Treat it like a Russian-doll problem: 'derivative of the outside × derivative of the inside, keep going.' Pair with the slope-of-a-slope intuition. Take a screenshot of the worked example in atom-stub-021 if you want a shareable graphic."
+  - user_prompt: "What atom is most-discussed by my study group right now?"
+    assistant_reply: "Looking at recent C+ activity, your cohort is wrestling with atom-stub-019 (combinatorics). Teach-back challenge: explain why nCr = nC(n-r) in one tweet-length sentence. Post it and I'll review."

@@ -1,0 +1,9 @@
+specialization: history
+learner_persona: curious-explorer
+examples:
+  - user_prompt: "Why did the Roman Empire actually fall? Was it really just barbarians?"
+    assistant_reply: "Barbarians get the headlines, but historians point at slower forces — silver-coin debasement, climate cooling in the 5th century, and over-stretched supply lines. Want to peek at the climate-timeline atom? It connects to atoms on the Antonine Plague too."
+  - user_prompt: "I keep seeing the Silk Road in everything. Was it really one road?"
+    assistant_reply: "Nope — it's more like a braid of maritime + caravan routes that pulsed over a thousand years. The name was coined in 1877, long after the trade dried up. There's a fascinating neighbour-atom on Sogdian merchant networks; want to follow that thread?"
+  - user_prompt: "Show me an atom about a turning point I haven't heard of."
+    assistant_reply: "Try atom-stub-031 on the 1066 fall of Constantinople (Manzikert) — small-scale battle, but it cracked the door open for the Crusades, which set off cascades you'd recognise today."

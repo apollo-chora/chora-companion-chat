@@ -1,0 +1,99 @@
+# Familiar Companion — A2A v1.0 Agent Card.
+#
+# Aligned with the Linux Foundation A2A v1.0 spec
+# (github.com/a2aproject/a2a-go@v0.3.15). Per POC W3.C Iter 6 Finding 4
+# paydown:
+#   - non-standard `inputSchema` / `outputSchema` / `consentScopeRequired`
+#     per-skill fields REMOVED (A2A v1.0 AgentSkill has no such fields)
+#   - per-AGID consent enforcement migrated to canonical SecuritySchemes
+#     + per-skill Security entries (FamiliarExposureGrantScheme)
+#
+# Server-side enforcement of consent_token + topic/message validation
+# lives in chora-a2a-gateway middleware (FamiliarExposureGrant) — the
+# card now contractually advertises the requirement so external A2A
+# peers can comply proactively.
+schemaVersion: "v1.0"
+name: familiar_companion
+description: "Per-learner RPG companion for personalised tutoring on the Chora platform (ADK Go 1.0)"
+version: "0.0.1-poc-go"
+url: "https://a2a.chora.site/agents/familiar_companion/rpc"
+preferredTransport: "JSONRPC"
+provider:
+  organization: "Chora"
+  url: "https://chora.site"
+defaultInputModes: ["application/json", "text/plain"]
+defaultOutputModes: ["application/json"]
+capabilities:
+  streaming: true
+  pushNotifications: false
+  extendedAgentCard: true
+securitySchemes:
+  # FamiliarExposureGrantScheme — per-AGID consent flow per ADR-132 +
+  # ADR-116 (1:N Familiar). The H+ partner-onboarding UI issues a signed
+  # JWT to the calling agent representing (gcid, agid, scope, expiry).
+  # chora-a2a-gateway middleware validates the JWT signature + scope
+  # before forwarding to the Familiar runtime.
+  FamiliarExposureGrantScheme:
+    type: apiKey
+    in: header
+    name: X-Chora-Consent-Token
+    description: |
+      Per-AGID consent token issued by the Chora H+ FamiliarExposureGrant
+      flow. Signed JWT carrying (gcid, agid, scope, expiry) tuple. Every
+      Familiar skill MUST receive a valid token; chora-a2a-gateway rejects
+      missing or expired tokens with HTTP 401 before invoking the
+      Familiar runtime. Scope determines which Familiar features the
+      calling agent can exercise.
+  ChoraOAuth2:
+    type: oauth2
+    description: |
+      OAuth2 client_credentials flow for the calling agent's AGID itself
+      (distinct from the per-learner consent token). The AGID's
+      credentials are issued by chora-iam at AGID registration time.
+    flows:
+      clientCredentials:
+        tokenUrl: "https://a2a.chora.site/oauth/token"
+        scopes:
+          "familiar:read": "Read-only access to Familiar skills (subject to per-learner consent)"
+# Top-level Security: every skill below inherits this baseline unless
+# overridden. ChoraOAuth2 authenticates the agent itself; the per-skill
+# FamiliarExposureGrantScheme adds the per-learner consent gate.
+security:
+  - ChoraOAuth2: ["familiar:read"]
+skills:
+  - id: study_conversation
+    name: study_conversation
+    description: "Multi-turn tutoring conversation with persona-aware tone calibration"
+    inputModes: ["application/json"]
+    outputModes: ["application/json"]
+    tags: ["tutoring", "conversation", "phyllis-mvp"]
+    examples:
+      - "Help me understand event-driven architecture for a junior engineer"
+    # Per-learner consent_token REQUIRED — overrides top-level security.
+    security:
+      - ChoraOAuth2: ["familiar:read"]
+        FamiliarExposureGrantScheme: []
+  - id: recommend_content
+    name: recommend_content
+    description: "Ranked content recommendations for a learner-specified topic"
+    inputModes: ["application/json"]
+    outputModes: ["application/json"]
+    tags: ["recommendation", "ranking"]
+    security:
+      - ChoraOAuth2: ["familiar:read"]
+        FamiliarExposureGrantScheme: []
+  - id: get_review_schedule_summary
+    name: get_review_schedule_summary
+    description: "Spaced-repetition review schedule for upcoming due atoms"
+    inputModes: ["application/json"]
+    outputModes: ["application/json"]
+    tags: ["review", "spaced-repetition", "ebbinghaus"]
+    security:
+      - ChoraOAuth2: ["familiar:read"]
+        FamiliarExposureGrantScheme: []
+additionalInterfaces:
+  - transport: "JSONRPC"
+    url: "https://a2a.chora.site/agents/familiar_companion/rpc"
+  - transport: "GRPC"
+    url: "https://a2a.chora.site/agents/familiar_companion"
+signatures: []

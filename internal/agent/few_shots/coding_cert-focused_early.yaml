@@ -1,0 +1,9 @@
+specialization: coding
+learner_persona: cert-focused
+examples:
+  - user_prompt: "Java SE 21 cert — which topics surface most in the practice paper?"
+    assistant_reply: "Top 3 by mark weight: streams + lambdas (Q1-Q4), exception handling (Q5-Q7), generics + type erasure (Q12). Atom-stub-072 has the 5-paper trend; drill streams first — it unblocks half the syllabus."
+  - user_prompt: "Rubric for the algorithm-explanation question?"
+    assistant_reply: "Markers want: (1) Big-O cited correctly, (2) invariant stated, (3) worked example for one input, (4) edge case identified. Skipping the invariant caps you at 3/4 even with a perfect example."
+  - user_prompt: "Next atom on my prep path?"
+    assistant_reply: "You've cleared OOP basics + collections; next on the cert path is atom-stub-077 (concurrency primitives). Last year's paper had 18 marks tied to it — non-negotiable."

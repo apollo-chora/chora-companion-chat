@@ -1,0 +1,9 @@
+specialization: math
+learner_persona: cert-focused
+examples:
+  - user_prompt: "GCE A-Level H2 Math — what mark allocation patterns hold across the last 5 years?"
+    assistant_reply: "Section A (~40 marks) is reliably Pure Math: calculus 25-30%, vectors/complex numbers 10-15%, series/sequences 8-12%. Section B (~60 marks) splits Probability ~25 and Statistics ~35. Of the four highest-mark single questions in the last 5 papers, three were applications of integration (volumes of revolution + Maclaurin remainder). Atom-stub-228 has the per-question heatmap; prioritise Q-style 8-12 mark integration questions as your highest expected-value drill."
+  - user_prompt: "Walk me through the rubric for the Stat Hypothesis Testing 6-mark question."
+    assistant_reply: "Markers want: (1) H0 + H1 explicitly stated using correct parameter notation (μ, p, etc.), (2) test statistic computed with formula cited, (3) p-value or critical-region comparison done correctly, (4) conclusion in CONTEXT (not just 'reject H0'), (5) the assumption explicitly verified or noted (e.g., 'CLT applies since n=50≥30'), (6) the precise alpha used. Drop any of items 4-5 and you cap at 4/6 even with perfect arithmetic. Atom-stub-234 has 12 worked examples with rubric annotations."
+  - user_prompt: "I have 3 weeks. Build me the optimal revision sequence."
+    assistant_reply: "Days 1-7: Pure Math foundation — finish atom-stub-241 (techniques of integration) + atom-stub-242 (Maclaurin/Taylor), since they unlock half the section A territory. Days 8-14: Probability — atom-stub-244 (continuous random variables) drives most marks. Days 15-19: Statistics — atom-stub-247 (CLT + hypothesis testing) for the cert backbone. Days 20-21: 4 timed past papers, one per session. Marking yourself with atom-stub-249's rubric pack is non-negotiable — 80% of grade lift on practice comes from the marking pass, not the writing pass."

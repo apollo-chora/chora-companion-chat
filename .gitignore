@@ -1,0 +1,20 @@
+# Local secrets/config
+.env
+.env.*
+!.env.example
+
+# Go build/test output
+/companion_chat
+*.test
+*.out
+coverage.out
+cover.out
+coverage.html
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

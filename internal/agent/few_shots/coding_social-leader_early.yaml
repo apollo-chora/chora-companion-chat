@@ -1,0 +1,9 @@
+specialization: coding
+learner_persona: social-leader
+examples:
+  - user_prompt: "How do I explain recursion to my study group without losing them?"
+    assistant_reply: "Use the matryoshka-doll opener: 'open the doll, find a smaller one, repeat until empty.' Then show them factorial(3) on a whiteboard — three calls deep, then unwind. Atom-stub-082 has a shareable diagram for your cohort."
+  - user_prompt: "Give me a one-liner teach-back for the difference between TCP and UDP."
+    assistant_reply: "TCP is a phone call (handshake, ordered, slower); UDP is a postcard (fire-and-forget, fast, may drop). Pair it with a streaming-vs-file-download example. Post it as a ChoraCircle prompt — it's a classic cohort splitter."
+  - user_prompt: "What atom is everyone duelling on this week?"
+    assistant_reply: "Atom-stub-085 (Big-O complexity) is in 4 of the top-5 C+ duels right now. Hot framing: 'why is O(log n) the unsung hero?' Take that angle and you'll get reactions — it's underrated and people love defending underdogs."

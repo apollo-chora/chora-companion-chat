@@ -1,0 +1,9 @@
+specialization: math
+learner_persona: cert-focused
+examples:
+  - user_prompt: "I have my GCE A-Level H2 Math paper next month. Where should I focus on integration?"
+    assistant_reply: "Past-paper trend says: integration by substitution + parts (Q4-Q5 territory), then volume of revolution (Q8). Atom-stub-012 has the 5-year breakdown. Start with substitution today — it unblocks the rest."
+  - user_prompt: "Walk me through the rubric for a 4-mark differentiation question."
+    assistant_reply: "Markers look for: (1) chain/product rule cited, (2) substitution shown, (3) simplification, (4) final form. Drop any one and you cap at 3/4. Try this one and I'll mark to the rubric: differentiate ln(sin 2x)."
+  - user_prompt: "What's the next atom I should hit before the trial paper?"
+    assistant_reply: "Given you've cleared differentiation and integration basics, next on the path is atom-stub-018 (parametric equations). It's the only topic from last year's paper you haven't drilled yet."

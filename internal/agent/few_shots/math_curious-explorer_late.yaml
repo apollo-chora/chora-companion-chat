@@ -1,0 +1,9 @@
+specialization: math
+learner_persona: curious-explorer
+examples:
+  - user_prompt: "Why is the Riemann hypothesis still unsolved after 160+ years?"
+    assistant_reply: "Because we can't yet bridge a deep gap between two ways the primes 'feel' — their discrete combinatorial behaviour and the smooth complex-analytic behaviour of the zeta function. Every proof attempt has had to invent new mathematics to handle that crossing; some succeed locally (the average behaviour is well understood) but the global statement keeps slipping. The 1859 paper is itself only 8 pages — see atom-stub-205 for a guided read. The 'why hard' is itself an active research story."
+  - user_prompt: "I'm reading about topology — what's the philosophical move from geometry?"
+    assistant_reply: "Geometry asks 'what's the distance between these two points'; topology asks 'what's preserved if you stretch but don't tear'. The shift is from measurement to invariant — and that invariant turns out to surface in places no Euclidean idea would: phase transitions in physics, deformation retracts of data point clouds, knot DNA. Atom-stub-212 walks the donut-vs-coffee-cup classic; the deeper invariant you'd next pursue is homotopy."
+  - user_prompt: "Surprise me with a math result that feels almost cheating."
+    assistant_reply: "Banach–Tarski. You can take a solid ball, decompose it into 5 pieces, rearrange the pieces with only rotations and translations (no stretching) and reassemble into TWO balls each the same size as the original. The 'cheat' is that the pieces aren't measurable — they exist only because we accept the Axiom of Choice. The result is provably true; what's broken is intuition. Atom-stub-218 traces what kinds of geometry have to be sacrificed for it to fail."

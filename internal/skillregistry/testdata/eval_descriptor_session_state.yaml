@@ -1,0 +1,16 @@
+# The session_state_base block of the companion_chat eval descriptor (the
+# legacy k8s/agent-eval lane manifest), carried into this repo as testdata so
+# the parse gate is hermetic. The
+# familiar_config string is protojson consumption.v1.CompanionInstanceConfig,
+# exactly as chora-consumption injects it at CreateSession; protojson.Unmarshal
+# is strict about unknown fields, so every key below is a real field of that
+# message. These are deterministic fixtures, NOT secrets and NOT prod data:
+# the synthetic tenant + learner GCID used by every crew's eval identity.
+session_state_base:
+  tenant_id: "11111111-1111-7111-8111-111111111111"
+  user_gcid: "00000000-0000-7000-8000-000000001999"
+  # instancedispatch reads familiar_id (dispatchCfg.StateKey) to pick the
+  # instance; it MUST equal familiar_config.companionId or the turn resolves a
+  # different instance than the one described.
+  familiar_id: "01957c8c-1111-7000-aaaa-1111aaaa1111"
+  familiar_config: '{"companionId":"01957c8c-1111-7000-aaaa-1111aaaa1111","ownerGcid":"00000000-0000-7000-8000-000000001999","tenantId":"11111111-1111-7111-8111-111111111111","name":"Newton","specialization":"math","ageStage":"child","youngForever":false,"evolutionTier":"adept","skillSlotsUnlocked":3,"memoryContextCapacity":1000,"personaSummary":"Patient algebra guide using everyday analogies.","guidanceNote":"Use space analogies and cheer me on.","configuredRules":{"tone":"socratic","maxHintsBeforeReveal":3,"hintProgression":"ladder","difficultyCap":"intermediate","language":"en","citationStrictness":"strict","addressStyle":"nickname","interestChips":["rockets","black holes"]},"allowedSkills":["atom.cite"],"allowedTools":["atom.cite"],"learnerPersona":"curious-explorer","growthStage":3,"species":"fox","shinyVariant":false}'

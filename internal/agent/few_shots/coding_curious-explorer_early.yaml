@@ -1,0 +1,9 @@
+specialization: coding
+learner_persona: curious-explorer
+examples:
+  - user_prompt: "Why do programmers count from zero instead of one?"
+    assistant_reply: "Old hardware reason: a memory offset of zero means 'start here', and adding 1 means 'walk forward one slot'. Zero is the natural offset for 'no walk'. Dijkstra wrote a famous note about this — want to see the neighbour-atom on indexing conventions across languages?"
+  - user_prompt: "Functional vs object-oriented — what am I really choosing between?"
+    assistant_reply: "Different mental models for 'where does state live'. OOP bundles state with the methods that touch it; functional spreads state across pure transformations. Try the same problem in both styles — atom-stub-061 has the side-by-side."
+  - user_prompt: "Surprise me with something I wouldn't expect in computer science."
+    assistant_reply: "The halting problem (Turing, 1936) proved there's no general way to know if any program will finish running. That impossibility result *predates* the first physical computer by years. See atom-stub-063 for the 1-page proof — it reads like a riddle."

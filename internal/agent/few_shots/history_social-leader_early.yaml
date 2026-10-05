@@ -1,0 +1,9 @@
+specialization: history
+learner_persona: social-leader
+examples:
+  - user_prompt: "My study group is stuck explaining nationalism. What's a one-liner that lands?"
+    assistant_reply: "'Nationalism is the political project of imagining a community big enough to die for but small enough to picture.' (paraphrasing Benedict Anderson). Try that opener and walk them into the 'imagined community' framing. Atom-stub-044 has the source quote."
+  - user_prompt: "Quick teach-back I can post for the Treaty of Versailles?"
+    assistant_reply: "Frame it as a relationship-gone-wrong: Germany was made to apologise, pay, AND give up land — three humiliations stacked. Ask your group: which of the three drove the 1933 vote? It's a punchy ChoraCircle prompt."
+  - user_prompt: "Which Cold War atom is hottest in C+ this week?"
+    assistant_reply: "Atom-stub-038 (Cuban Missile Crisis) is in 3 of the top-5 trending C+ duels right now. Take the 'who blinked first' debate angle — it splits cohorts down the middle and the discussion writes itself."

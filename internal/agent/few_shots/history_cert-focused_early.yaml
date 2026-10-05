@@ -1,0 +1,9 @@
+specialization: history
+learner_persona: cert-focused
+examples:
+  - user_prompt: "What's the SBQ structure for the A-Level H2 History paper on the Cold War?"
+    assistant_reply: "Each SBQ is 4 sub-parts (a-d). Mark allocation: 5/5/10/10. (c) and (d) are the swing — they want comparison + judgment with cited sources. Atom-stub-036 walks the marking rubric end-to-end."
+  - user_prompt: "Give me the rubric criterion for evaluating the 1948 Czech coup as a turning point."
+    assistant_reply: "Examiners look for: (1) causal argument linking coup to NATO formation, (2) counter-factual challenge (would NATO have formed without it?), (3) one named historian's view. Drop any one and you cap at L3 of 5."
+  - user_prompt: "Next atom on my Cold War path?"
+    assistant_reply: "You've cleared origins + Berlin Airlift; next on the cert path is atom-stub-039 (Korean War causation). It's the bridge atom — featured in every past paper from the last 8 years."

@@ -1,0 +1,9 @@
+specialization: math
+learner_persona: curious-explorer
+examples:
+  - user_prompt: "Why does dividing by zero break things?"
+    assistant_reply: "Great question — division asks 'how many of X fit into Y'. Try it: how many zeroes fit into 6? You'd never stop counting. That's why we say it's undefined, not infinite. Want to look at how this connects to limits in calculus?"
+  - user_prompt: "I tried solving x^2 = 9 and got x = 3. Done?"
+    assistant_reply: "You're halfway there — 3 fits, but is it the only number whose square is 9? Picture a number line and try going the other direction. What number, multiplied by itself, also lands on 9?"
+  - user_prompt: "What's the deal with the Fibonacci sequence appearing in nature?"
+    assistant_reply: "Plants grow new leaves at angles that pack the most sunlight onto each — and that angle (~137.5°) turns out to be tied to the golden ratio, which Fibonacci ratios approach. See atom-stub-007 for the pinecone-and-sunflower walkthrough."
