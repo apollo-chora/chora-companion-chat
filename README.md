@@ -1,114 +1,105 @@
 # chora-companion-chat
 
-The Learning Companion's chat agent (ADR-254 D2/D6/D8, ex familiar): a Go ADK
-agent crew that serves the `companion_chat` dispatch role **subscriber-only**.
-It consumes agent-dispatch requests from NATS JetStream, runs the per-Companion
-chat agent in-process, and publishes the completion envelope back onto the
-reply subject. There is no ADK web launcher and no HTTP surface except the
-health port (`/healthz`, `/readyz` on `AGENT_HEALTH_PORT`, default `8080`).
+## About
 
-Module path: `github.com/apollo-chora/chora-companion-chat`.
+`chora-companion-chat` is a Go service that runs the Chora Learning Companion chat agent. It consumes `companion_chat` agent-dispatch requests from NATS JetStream, runs a per-Companion Google ADK agent, and publishes a JSON completion envelope to the dispatch reply subject. The service is subscriber-only; its HTTP surface is limited to health and readiness endpoints.
 
-The crew is cloud-neutral: NATS JetStream for events (via
-`chora-common/eventbus`), standard OTLP for traces (via `chora-common/otel`),
-env-backed secrets (via `chora-common/secrets`), and the local model gateway
-(`chora-model-gateway` through `chora-adk-common/modelgatewayclient`) for
-model calls. No cloud account or managed service is required.
+The agent supports three turn kinds: `typed` (normal conversation), `voice` (voices a Growth-Edge diagnosis), and `reflect` (per-goal reflection). Typed turns use a Postgres-backed ADK session store keyed by `conversation_id`; model calls go through `chora-model-gateway`.
 
-## Turns
+## Quick start
 
-Every dispatch carries a `turn_kind` in its payload:
+Prerequisites:
 
-- **typed** — a learner's message in a persistent conversation. The ADK session
-  is keyed on `conversation_id` and lives in Postgres, so two replicas serve
-  consecutive turns of one conversation.
-- **voice** — the voiced Growth-Edge diagnosis from the companion-diagnosis
-  crew, joined onto the learner's conversation.
-- **reflect** — the ADR-235 per-goal reflection, with the honest `NO_MEMORY_YET`
-  decline and the 600-char contract.
+- Go 1.26.6
+- A Postgres database containing the migrated `companion_chat_sessions` session tables
+- A NATS JetStream broker
+- A reachable `chora-model-gateway` instance
+- An env-backed secret containing the Postgres DSN
 
-Every turn answers with one JSON envelope:
+Clone the repository and run the test suite:
 
-```json
-{"turn_kind": "...", "reply_text": "...", "grounding": [], "tool_calls": [],
- "model_id": "...", "prompt_version": "...", "prompt_source": "..."}
-```
+    git clone https://github.com/apollo-chora/chora-companion-chat.git
+    cd chora-companion-chat
+    go test ./...
 
-## Layout
+To build and run the binary:
 
-```
-├── cmd/companion_chat/        # entry point — boot wiring only
-├── internal/agent/            # the per-Companion chat agent: prompt
-│                               # composition, few-shots, growth/memory weave,
-│                               # turn router, envelope contract
-├── internal/boot/             # config, session store, plugin chain, run
-├── internal/skillregistry/    # Familiar (Companion) config registry
-│                               # (stub + state-backed)
-├── internal/tool/             # cite_atom (chora-creation) and
-│                               # weakness.read (chora-consumption) tools
-└── agent_card.yaml            # A2A v1.0 Agent Card (POC-era artifact)
-```
+    go build ./cmd/companion_chat
+    ./companion_chat
 
-## Dependencies
+The binary takes no command-line arguments.
 
-| Dependency | Purpose |
-|---|---|
-| `github.com/apollo-chora/chora-adk-common` | dispatch subscriber, model-gateway LLM adapter, plugin chain pieces, OTel wiring |
-| `github.com/apollo-chora/chora-common` | env-backed secrets, event bus, OTel |
-| `github.com/apollo-chora/chora-contracts/gen/go` | consumption + creation gRPC contracts (tool clients) |
-| `google.golang.org/adk` | the ADK agent framework (not a cloud dependency) |
+## Usage
 
-## Configuration
+The service is configured through environment variables. At minimum, set the gateway scope, session DSN secret name, and NATS URL:
 
-| Variable | Purpose | Default |
+    export CHORA_GATEWAY_TENANT_ID=<tenant-id>
+    export CHORA_GATEWAY_GCID=<gcid>
+    export COMPANION_CHAT_SESSIONS_DSN_SECRET_ID=<secret-name>
+    export NATS_URL=<nats-url>
+    export AGENT_DISPATCH_ENABLED=true
+
+The main configuration variables are:
+
+| Variable | Default | Description |
 | --- | --- | --- |
-| `CHORA_PROJECT` | project label for secret resolution | `chora-local` |
-| `CHORA_LOCATION` | location label stamped on the boot line | `local` |
-| `COMPANION_CHAT_MODEL` | logical model id passed to the model gateway | `gemini-2.5-flash` |
-| `COMPANION_CHAT_SESSIONS_DSN_SECRET_ID` | env-backed secret name of the Postgres DSN for the ADK session store | required |
-| `COMPANION_CHAT_SESSIONS_SCHEMA` | session schema (`search_path`) in the database | `companion_chat_sessions` |
-| `CHORA_GATEWAY_ENDPOINT` | model gateway gRPC endpoint | `gateway.chora.site:443` |
-| `CHORA_GATEWAY_TENANT_ID` / `CHORA_GATEWAY_GCID` | process fallback for the gateway client (per-request values from the dispatch win) | required |
-| `CONSUMPTION_GRPC_ENDPOINT` | consumption gRPC (`weakness.read`); `stub://` = tool absent | `stub://chora-consumption` |
-| `CREATION_GRPC_ENDPOINT` | creation gRPC (`cite_atom` validator); `stub://` = stub validator | `stub://chora-creation` |
-| `CHORA_ENV` | `dev` \| `staging` \| `prod` | `dev` |
-| `AGENT_DISPATCH_ENABLED` | must be `true` — the dispatch subscriber is the only transport | — |
-| `NATS_URL` | NATS JetStream broker URL | required at serve time |
-| `AGENT_DISPATCH_SUBSCRIPTION` | consumer name override | derived from service + role |
-| `AGENT_HEALTH_PORT` | health/readiness port | `8080` |
+| `CHORA_PROJECT` | `chora-local` | Project label passed to the env-backed secrets client. |
+| `CHORA_LOCATION` | `local` | Location label used in boot configuration. |
+| `COMPANION_CHAT_MODEL` | `gemini-2.5-flash` | Logical model ID sent to the model gateway. |
+| `COMPANION_CHAT_SESSIONS_DSN_SECRET_ID` | required | Name of the secret containing the Postgres DSN. |
+| `COMPANION_CHAT_SESSIONS_SCHEMA` | `companion_chat_sessions` | Postgres schema containing the ADK session tables. |
+| `CHORA_GATEWAY_ENDPOINT` | `gateway.chora.site:443` | Model gateway gRPC endpoint. |
+| `CHORA_GATEWAY_AUDIENCE` | `https://gateway.chora.site` | ID-token audience used for gateway calls. |
+| `CHORA_GATEWAY_TENANT_ID` | required | Process fallback tenant ID for the gateway client; request values take precedence. |
+| `CHORA_GATEWAY_GCID` | required | Process fallback GCID for the gateway client; request values take precedence. |
+| `CONSUMPTION_GRPC_ENDPOINT` | `stub://chora-consumption` | Consumption gRPC endpoint. A `stub://` value disables the `weakness.read` tool and uses the stub Companion registry. |
+| `CREATION_GRPC_ENDPOINT` | `stub://chora-creation` | Creation gRPC endpoint used by `cite_atom`. |
+| `CHORA_ENV` | `dev` | Runtime environment label: `dev`, `staging`, or `prod`. |
+| `AGENT_DISPATCH_ENABLED` | must be `true` | Enables the only transport used by this service. |
+| `NATS_URL` | required | NATS JetStream broker URL. |
+| `AGENT_DISPATCH_SUBSCRIPTION` | derived | Optional override for the dispatch consumer name. |
+| `AGENT_HEALTH_PORT` | `8080` | Port for `/healthz` and `/readyz`. |
 
-## Runtime dependencies
+At serve time, the subscriber consumes `chora.ai_kernel.agent_dispatch.companion_chat_requested.v1` from the `CHORA_EVENTS` JetStream stream and publishes the completion envelope onto the reply subject.
 
-- **Postgres** — required. The ADK session store is Postgres, never in-memory
-  (ADR-254 D5): a chat agent with an in-memory store would forget the
-  conversation on every second replica. The DSN comes from the env-backed
-  secret named by `COMPANION_CHAT_SESSIONS_DSN_SECRET_ID`
-  (`SECRET_<NAME>`, `<NAME>`, or the raw name). The store must be in the
-  migrated shape (four tables — `sessions`, `events`, `app_states`,
-  `user_states` — each with a `tenant_id` column, RLS enabled and forced, and
-  at least one policy) or the boot fails.
-- **NATS** — required at serve time. The dispatch subscriber consumes
-  `chora.ai_kernel.agent_dispatch.companion_chat_requested.v1` from the
-  `CHORA_EVENTS` stream and publishes completions onto the reply subject.
-- **chora-model-gateway** — required for model calls (the crew has no other
-  model adapter).
+A completion has this shape:
 
-## Build and test
+    {"turn_kind":"typed","reply_text":"...","grounding":[],"tool_calls":[],"model_id":"...","prompt_version":"...","prompt_source":"...","prompt_hash":"..."}
 
-```sh
-go build ./...
-go vet ./...
-go test ./...
-```
+The `prompt_source` field is `registry` when a prompt override is present and `embedded_fallback` otherwise. `grounding` contains confirmed atom citations produced by `cite_atom`; a failed atom validation is not emitted as grounding.
 
-The suite is hermetic — no broker, database, or network is required.
+Health checks are available on the configured health port:
 
-## Docker
+    curl http://localhost:8080/healthz
+    curl http://localhost:8080/readyz
 
-```sh
-docker buildx build --platform=linux/amd64 -f Dockerfile \
-  --build-arg SERVICE_NAME=chora-companion-chat \
-  --build-arg GIT_SHA=$(git rev-parse --short HEAD) \
-  --build-arg BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
-  -t walfa/chora-companion-chat:latest .
-```
+The Docker image can be built from the repository root:
+
+    docker buildx build --platform=linux/amd64 -f Dockerfile       --build-arg SERVICE_NAME=chora-companion-chat       --build-arg GIT_SHA=$(git rev-parse --short HEAD)       --build-arg BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)       -t walfa/chora-companion-chat:latest .
+
+## Development
+
+The repository is a standalone Go module:
+
+    module github.com/apollo-chora/chora-companion-chat
+
+The main entry point is `cmd/companion_chat/main.go`. The implementation is split across:
+
+    cmd/companion_chat/       executable entry point
+    internal/agent/           turn handling, prompts, memory and Companion behaviour
+    internal/boot/            configuration, session store, dispatch wiring and plugins
+    internal/skillregistry/   per-Companion configuration registry
+    internal/tool/            cite_atom and weakness.read adapters
+    agent_card.yaml            A2A agent card artifact
+
+Run the same checks used by CI:
+
+    gofmt -l .
+    go mod tidy
+    git diff --exit-code -- go.mod go.sum
+    go vet ./...
+    go test ./...
+
+The test suite is designed to run without a broker or network. A running Postgres instance is only needed when exercising the live subscriber/session-store path.
+
+The session store expects four ADK tables in the configured schema: `sessions`, `events`, `app_states`, and `user_states`. Each must have a `tenant_id` column, row-level security enabled and forced, and at least one RLS policy. The service checks this shape and a tenant GUC round-trip during startup before it begins serving.
