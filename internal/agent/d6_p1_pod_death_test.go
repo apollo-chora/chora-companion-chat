@@ -24,7 +24,7 @@ func TestD6P1_familiarIDIsTheSoleRecoveryKey(t *testing.T) {
 	r := skillregistry.NewStubRegistry()
 
 	// PRE-pod-death state: load Newton's config.
-	pre, err := r.LoadFamiliarConfig(context.Background(), skillregistry.DefaultFamiliarID())
+	pre, err := r.LoadFamiliarConfig(context.Background(), "01957c8c-1111-7000-aaaa-1111aaaa1111")
 	if err != nil {
 		t.Fatalf("PRE load failed: %v", err)
 	}
@@ -32,7 +32,7 @@ func TestD6P1_familiarIDIsTheSoleRecoveryKey(t *testing.T) {
 	// Simulate pod death + reload (new registry instance — like a fresh
 	// container coming up after engine identity change).
 	rFresh := skillregistry.NewStubRegistry()
-	post, err := rFresh.LoadFamiliarConfig(context.Background(), skillregistry.DefaultFamiliarID())
+	post, err := rFresh.LoadFamiliarConfig(context.Background(), "01957c8c-1111-7000-aaaa-1111aaaa1111")
 	if err != nil {
 		t.Fatalf("POST load failed: %v", err)
 	}

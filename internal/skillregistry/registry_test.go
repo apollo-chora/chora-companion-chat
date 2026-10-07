@@ -108,13 +108,6 @@ func TestStubRegistry_returnsDefensiveCopy(t *testing.T) {
 	}
 }
 
-func TestDefaultFamiliarID_isMath(t *testing.T) {
-	// The default specimen (used by Loader.RootAgent for warm-up) is the math Familiar.
-	if DefaultFamiliarID() != stubMathFamiliarID {
-		t.Errorf("default familiar id should be math (%s); got %s", stubMathFamiliarID, DefaultFamiliarID())
-	}
-}
-
 // ---------- LearnerPersona overlay (ADR-116 Amendment 2, Iter 1 BLANKET) ----------
 
 func TestStubRegistry_carriesLearnerPersonaPerFamiliar(t *testing.T) {

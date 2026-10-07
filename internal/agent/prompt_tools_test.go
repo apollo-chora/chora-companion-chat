@@ -24,7 +24,7 @@ func TestComposedPromptNamesOnlyExposedToolNames(t *testing.T) {
 		},
 		AllowedTools: []string{"atom.cite"},
 	}
-	prompt := ComposeInstruction(cfg)
+	prompt := ComposeInstructionWithOverrides(cfg, nil)
 
 	for _, ladderOnly := range []string{
 		"atom_search", "persona_lookup", "ebbinghaus_state", "score_atom_for_learner",
@@ -49,7 +49,7 @@ func TestComposedPromptOmitsCiteLineWhenToolNotAllowed(t *testing.T) {
 		},
 		AllowedTools: nil,
 	}
-	prompt := ComposeInstruction(cfg)
+	prompt := ComposeInstructionWithOverrides(cfg, nil)
 	if strings.Contains(prompt, "cite_atom") {
 		t.Errorf("prompt must not name cite_atom when atom.cite is not in the allowed tool set")
 	}

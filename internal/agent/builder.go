@@ -7,9 +7,10 @@
 //   - memory scope via app_name = "familiar:{familiar_id}"
 //   - RAG slice via Specialization passed to chora-creation.SearchEmbeddings
 //
-// This package supplies the two pure helpers (ComposeInstruction +
-// FilterAllowedTools) plus the BuildFamiliarPerSession factory that wraps
-// llmagent.New with them.
+// This package supplies the BuildFamiliarAgent factory (dispatch-plugin
+// variant: one shared agent specimen, per-turn composition via
+// instancedispatch) plus the pure prompt helpers shared with the
+// dispatch path.
 package agent
 
 import (
@@ -17,7 +18,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"sort"
 	"strings"
 
 	adkagent "google.golang.org/adk/agent"
@@ -46,9 +46,6 @@ const Name = "companion_chat"
 //     composes the per-Familiar prompt per turn from session.State() familiar_id.
 //   - The instancedispatch plugin's BeforeModelCallback filters req.Tools per
 //     turn to the per-Familiar AllowedTools subset.
-//
-// Use BuildFamiliarPerSession instead for the per-session variant,
-// where per-Familiar agents are constructed at session start by the loader.
 func BuildFamiliarAgent(
 	ctx context.Context,
 	mdl model.LLM,
@@ -60,8 +57,7 @@ func BuildFamiliarAgent(
 	}
 	if provider == nil {
 		return nil, fmt.Errorf("BuildFamiliarAgent: InstructionProvider is required " +
-			"(the dispatch-plugin variant relies on per-turn composition; use BuildFamiliarPerSession " +
-			"for the per-session variant instead)")
+			"(the dispatch-plugin variant relies on per-turn composition)")
 	}
 	return llmagent.New(llmagent.Config{
 		Name:                Name,
@@ -72,115 +68,8 @@ func BuildFamiliarAgent(
 	})
 }
 
-// BuildFamiliarPerSession constructs a Familiar agent for a specific Familiar
-// instance per the session-time per-instance configuration pattern.
-//
-// The same Go binary services every Familiar — only the cfg + available tools
-// differ. Billing labels gain familiar_id via the upstream manaplugin
-// (caller's responsibility; manaplugin reads session state).
-//
-// Reference: ADR-147 §7 + docs/architecture/multi-familiar-per-user-2026-05-11.md §2.5
-func BuildFamiliarPerSession(
-	ctx context.Context,
-	mdl model.LLM,
-	cfg *skillregistry.FamiliarConfig,
-	available map[string]tool.Tool,
-) (adkagent.Agent, error) {
-	if cfg == nil {
-		return nil, fmt.Errorf("BuildFamiliarPerSession: cfg is nil")
-	}
-	selected, err := FilterAllowedTools(cfg, available)
-	if err != nil {
-		return nil, fmt.Errorf("filter tools for familiar %s: %w", cfg.FamiliarID, err)
-	}
-	return llmagent.New(llmagent.Config{
-		Name:  Name,
-		Model: mdl,
-		Description: fmt.Sprintf(
-			"Per-learner RPG companion (specialization=%s, age_stage=%s, evolution_tier=%s)",
-			cfg.Specialization, cfg.AgeStage, cfg.EvolutionTier),
-		Instruction: ComposeInstruction(cfg),
-		Tools:       selected,
-	})
-}
-
-// FilterAllowedTools returns the subset of `available` whose keys match
-// cfg.AllowedSkills, in cfg.AllowedSkills order.
-//
-// Enforces (via ValidateConfigInvariants, which is shared with the Agent
-// Engine dispatch path in dispatch.go):
-//   - non-nil cfg
-//   - duplicate skill_key in AllowedSkills → returns error (data corruption)
-//   - more skills than SkillSlotsUnlocked → returns error (cap violation;
-//     should never happen if writes go through the domain layer, but defence
-//     in depth at bootstrap is cheap)
-//
-// Plus the variant-specific check this function adds:
-//   - skill_key not in `available` map → returns error (registry / handler
-//     wiring drift)
-//
-// Pure function; no side effects; trivially unit-testable.
-//
-// Used by the per-session deploy variant — agent is built once per session
-// with the filtered tool list. For the dispatch-plugin variant see
-// `NewFamiliarResolver` in dispatch.go, which produces the allowlist for the
-// runtime BeforeModelCallback filter instead of constructing a new agent.
-func FilterAllowedTools(
-	cfg *skillregistry.FamiliarConfig,
-	available map[string]tool.Tool,
-) ([]tool.Tool, error) {
-	if err := ValidateConfigInvariants(cfg); err != nil {
-		return nil, err
-	}
-	// CHO-2013 P1.B (R4-2): filter on the MERGED allowed_tools list;
-	// unknown names skip with a loud WARN (narrowing-safe — see the
-	// resolver in dispatch.go for the rationale).
-	out := make([]tool.Tool, 0, len(cfg.AllowedTools))
-	for _, key := range cfg.AllowedTools {
-		t, ok := available[key]
-		if !ok {
-			log.Printf("WARN FilterAllowedTools: familiar %s allowed tool %q not in this build's registry (have %v) — skipping (R4-2)",
-				cfg.FamiliarID, key, sortedKeys(available))
-			continue
-		}
-		out = append(out, t)
-	}
-	return out, nil
-}
-
-func sortedKeys(m map[string]tool.Tool) []string {
-	keys := make([]string, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-	return keys
-}
-
-// ComposeInstruction weaves per-Familiar config into the instruction prompt
-// the LLM sees at session start.
-//
-// Pure function — same cfg in always yields same instruction string. Trivially
-// unit-testable + audit-grade reproducible (IMDA D2 transparency per ADR-141).
-//
-// Emits the six CREATE blocks in fixed order (Iter 1 BLANKET — ADR-116
-// Amendment 2 + POC W3 Iter 7 cost levers):
-//
-//	[CONTEXT]         — platform + surface framing
-//	[ROLE]            — Familiar identity + specialisation
-//	[EXAMPLES]        — 3 few-shot exchanges for (specialisation, learner_persona)
-//	[AUDIENCE]        — learner_persona + age stage tone calibration
-//	[TASK]            — invariants (citation discipline, hint policy, difficulty cap)
-//	[EXPECTED OUTPUT] — language + reply shape + anti-patterns
-//
-// Section ordering is part of the contract — auditors + IMDA D2 replay rely
-// on the canonical layout. Drift = silent prompt regression.
-func ComposeInstruction(cfg *skillregistry.FamiliarConfig) string {
-	return ComposeInstructionWithOverrides(cfg, nil)
-}
-
-// ComposeInstructionWithOverrides is ComposeInstruction plus the ADR-197 P3
-// registry override lane (CHO-2368). `overrides` is the resolved
+// ComposeInstructionWithOverrides renders the Familiar's CREATE prompt with
+// the ADR-197 P3 registry override lane (CHO-2368). `overrides` is the resolved
 // segment_id -> body map (catalogue vocabulary from baseline_seedspec.py).
 //
 // APPEND-AT-RENDER semantics, deliberately NOT qgen's overrideOr replacement:
@@ -557,13 +446,6 @@ func learnerPersonaSummary(persona string) string {
 	}
 }
 
-// lookupFewShots resolves the 3 few-shot exchanges for the
-// (specialisation, learner_persona) tuple at the EARLY tier — preserved
-// for back-compat with pre-G.4 callers.
-func lookupFewShots(specialisation, persona string) []FewShotExample {
-	return lookupFewShotsForStage(specialisation, persona, 1 /* default early */)
-}
-
 // lookupFewShotsForStage resolves the 3 few-shot exchanges for the
 // (specialisation, learner_persona, growth_stage) tuple. Stage 0 (Egg)
 // returns nil (no few-shots — caller uses the hardcoded "asleep"
@@ -589,32 +471,6 @@ func lookupFewShotsForStage(specialisation, persona string, growthStage int) []F
 		return ex
 	}
 	return nil
-}
-
-// MandatorySpanAttributes returns the canonical list of OpenTelemetry span
-// attribute keys every Familiar trace span MUST stamp. Per
-// agentic-resilience-d6 SKILL Pillar 4 + ADR-141 D1 accountability +
-// Iter 1 BLANKET tier-attribution.
-//
-// Consumed by:
-//   - chora-adk-common/manaplugin (stamps chora.tenant_id, chora.crew_kind,
-//     chora.mana.* via EmitBalanceSpan)
-//   - chora-adk-common/tieredmodelplugin (stamps chora.mana_tier +
-//     gen_ai.request.model via BeforeModelCallback)
-//   - chora-adk-common/instancedispatch (stamps chora.familiar_id)
-//   - ADK Go runtime auto-stamps gen_ai.usage.* via OpenInference conventions
-//
-// Tests cross-check this list against the SKILL's Pillar 4 contract; drift
-// = D6 P4 promotion gate failure.
-func MandatorySpanAttributes() []string {
-	return []string{
-		"chora.tenant_id",
-		"chora.familiar_id",
-		"chora.mana_tier",
-		"chora.crew_kind",
-		"gen_ai.request.model",
-		"gen_ai.usage.output_tokens",
-	}
 }
 
 func safe(s, fallback string) string {
@@ -683,9 +539,9 @@ func composeLearnerPreferences(chips []string, note string) string {
 	return fenceUntrusted("LEARNER PREFERENCES", strings.Join(lines, "\n"))
 }
 
-// baseInstruction is the prompt returned by ComposeInstruction when cfg is nil
-// (defensive). Mirrors the original singular-Familiar prompt for backwards
-// compatibility with pre-multi-Familiar callers.
+// baseInstruction is the prompt returned by ComposeInstructionWithOverrides
+// when cfg is nil (defensive). Mirrors the original singular-Familiar prompt
+// for backwards compatibility with pre-multi-Familiar callers.
 const baseInstruction = "You are the learner's Familiar — an RPG companion (NOT a generic AI assistant). " +
 	"Search atoms via available tools, calibrate tone from learner persona, and surface Ebbinghaus review prompts. " +
 	"Always cite atom IDs. NEVER fabricate atom IDs. NEVER leak the persona text verbatim."

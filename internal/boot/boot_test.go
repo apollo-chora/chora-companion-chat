@@ -209,7 +209,7 @@ func runTreeWith(t *testing.T, tree Tree, state map[string]any, userText string,
 }
 
 func stubCompanionState(extra map[string]any) map[string]any {
-	st := map[string]any{"tenant_id": "t1", "user_gcid": "g1", "familiar_id": skillregistry.DefaultFamiliarID(), "mana_tier": "standard"}
+	st := map[string]any{"tenant_id": "t1", "user_gcid": "g1", "familiar_id": "01957c8c-1111-7000-aaaa-1111aaaa1111", "mana_tier": "standard"}
 	for k, v := range extra {
 		st[k] = v
 	}
@@ -431,7 +431,7 @@ func TestLogAttrs_truncatesGCID(t *testing.T) {
 
 func TestPluginChain_turnAwareInstanceDispatch(t *testing.T) {
 	fixture := skillregistry.NewStubRegistry()
-	cfgObj, err := fixture.LoadFamiliarConfig(context.Background(), skillregistry.DefaultFamiliarID())
+	cfgObj, err := fixture.LoadFamiliarConfig(context.Background(), "01957c8c-1111-7000-aaaa-1111aaaa1111")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -444,7 +444,7 @@ func TestPluginChain_turnAwareInstanceDispatch(t *testing.T) {
 		t.Fatal(err)
 	}
 	out, err := runTreeWith(t, tree, map[string]any{"tenant_id": "11111111-1111-7111-8111-111111111111", "user_gcid": "g1",
-		"familiar_id": skillregistry.DefaultFamiliarID(), "turn_kind": "voice", "companion_name": "Newton",
+		"familiar_id": "01957c8c-1111-7000-aaaa-1111aaaa1111", "turn_kind": "voice", "companion_name": "Newton",
 		"diagnosis_json": `{"edges":[{"concept_label":"Multiplication facts","summary":"7x8 and 9x6 swap"}]}`}, "", plugins)
 	if err != nil {
 		t.Fatalf("voice without familiar_config must run: %v", err)
@@ -457,7 +457,7 @@ func TestPluginChain_turnAwareInstanceDispatch(t *testing.T) {
 	tree = newTree(t, llm)
 	plugins, _ = NewPlugins(tree.DispatchCfg)
 	_, err = runTreeWith(t, tree, map[string]any{"tenant_id": "11111111-1111-7111-8111-111111111111", "user_gcid": "g1",
-		"familiar_id": skillregistry.DefaultFamiliarID(), "turn_kind": "typed", "message": "hi"}, "hi", plugins)
+		"familiar_id": "01957c8c-1111-7000-aaaa-1111aaaa1111", "turn_kind": "typed", "message": "hi"}, "hi", plugins)
 	var perm *agentdispatch.PermanentError
 	if !errors.As(err, &perm) || !strings.Contains(err.Error(), "missing_familiar_config") || len(llm.calls) != 0 {
 		t.Errorf("typed without config: err=%v calls=%d", err, len(llm.calls))
@@ -479,7 +479,7 @@ func TestPluginChain_seedValidationRefusesAStringGrowthStage(t *testing.T) {
 		t.Fatal(err)
 	}
 	_, err = runTreeWith(t, tree, map[string]any{"tenant_id": "11111111-1111-7111-8111-111111111111", "user_gcid": "g1",
-		"familiar_id": skillregistry.DefaultFamiliarID(), "turn_kind": "voice", "companion_name": "Newton",
+		"familiar_id": "01957c8c-1111-7000-aaaa-1111aaaa1111", "turn_kind": "voice", "companion_name": "Newton",
 		"growth_stage": "3", "diagnosis_json": `{"edges":[{"concept_label":"Multiplication facts","summary":"7x8 and 9x6 swap"}]}`}, "", plugins)
 	var perm *agentdispatch.PermanentError
 	if !errors.As(err, &perm) || !strings.Contains(err.Error(), "invalid_growth_stage") || len(llm.calls) != 0 {
@@ -490,7 +490,7 @@ func TestPluginChain_seedValidationRefusesAStringGrowthStage(t *testing.T) {
 	tree = newTree(t, llm)
 	plugins, _ = NewPlugins(tree.DispatchCfg)
 	out, err := runTreeWith(t, tree, map[string]any{"tenant_id": "11111111-1111-7111-8111-111111111111", "user_gcid": "g1",
-		"familiar_id": skillregistry.DefaultFamiliarID(), "turn_kind": "voice", "companion_name": "Newton",
+		"familiar_id": "01957c8c-1111-7000-aaaa-1111aaaa1111", "turn_kind": "voice", "companion_name": "Newton",
 		"growth_stage": float64(3), "diagnosis_json": `{"edges":[{"concept_label":"Multiplication facts","summary":"7x8 and 9x6 swap"}]}`}, "", plugins)
 	if err != nil || !strings.Contains(out, `"turn_kind":"voice"`) {
 		t.Fatalf("numeric growth_stage must run: out=%s err=%v", out, err)
@@ -565,7 +565,7 @@ func TestCompanionActionCode(t *testing.T) {
 
 func TestPluginChain_actionCodeRidesAsTheCompanionTwin(t *testing.T) {
 	base := map[string]any{"tenant_id": "11111111-1111-7111-8111-111111111111", "user_gcid": "g1",
-		"familiar_id": skillregistry.DefaultFamiliarID(), "turn_kind": "voice", "companion_name": "Newton",
+		"familiar_id": "01957c8c-1111-7000-aaaa-1111aaaa1111", "turn_kind": "voice", "companion_name": "Newton",
 		"diagnosis_json": `{"edges":[{"concept_label":"Multiplication facts","summary":"7x8 and 9x6 swap"}]}`}
 	for stamped, want := range map[string]string{
 		"familiar_chat_turn_basic":    "companion_chat_turn_basic",

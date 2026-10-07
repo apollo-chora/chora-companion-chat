@@ -2,8 +2,8 @@ package agent
 
 // golden_test.go - frozen composed-instruction golden for the Familiar
 // (CHO-2368, ADR-197 catalogue). Same discipline as the qgen/OE goldens: the
-// golden is the byte-pinned ComposeInstruction rendering of a canonical staged
-// config with NO overrides. The ADR-197 baseline seed generator (orchestrator
+// golden is the byte-pinned CREATE-prompt rendering (no overrides) of a
+// canonical staged config. The ADR-197 baseline seed generator (orchestrator
 // domain/prompt_registry/baseline_seedspec.py) regex-pins its familiar
 // catalogue segment TEMPLATES against this file (placeholders wildcarded), so
 // a builder.go / fencing.go template edit either regenerates the golden
@@ -62,7 +62,7 @@ func goldenFamiliarCfg() *skillregistry.FamiliarConfig {
 }
 
 func TestComposeInstruction_FamiliarGoldenByteIdentical(t *testing.T) {
-	got := ComposeInstruction(goldenFamiliarCfg())
+	got := ComposeInstructionWithOverrides(goldenFamiliarCfg(), nil)
 	path := filepath.Join("testdata", "golden_instruction_canonical.txt")
 	if *updateGolden {
 		if err := os.MkdirAll("testdata", 0o755); err != nil {
@@ -78,6 +78,6 @@ func TestComposeInstruction_FamiliarGoldenByteIdentical(t *testing.T) {
 		t.Fatalf("read golden %s (run with -update to generate): %v", path, err)
 	}
 	if got != string(want) {
-		t.Fatalf("ComposeInstruction drifted from %s - if intentional, regenerate with -update AND expect the ADR-197 baseline seed drift test to demand a catalogue update", path)
+		t.Fatalf("CREATE prompt drifted from %s - if intentional, regenerate with -update AND expect the ADR-197 baseline seed drift test to demand a catalogue update", path)
 	}
 }

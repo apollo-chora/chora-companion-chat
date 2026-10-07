@@ -174,7 +174,7 @@ func TestFamiliarResolver_skipsUnknownAllowedTool(t *testing.T) {
 	}
 }
 
-// ---------- ValidateConfigInvariants (extracted from FilterAllowedTools) ----------
+// ---------- ValidateConfigInvariants ----------
 
 func TestValidateConfigInvariants_rejectsNilCfg(t *testing.T) {
 	if err := ValidateConfigInvariants(nil); err == nil {

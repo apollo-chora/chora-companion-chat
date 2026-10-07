@@ -52,13 +52,6 @@ type FewShotsStore struct {
 	byKey map[string][]FewShotExample
 }
 
-// Lookup returns the 3-example slice for the (spec, persona) tuple at the
-// default early tier — preserved for back-compat with callers predating
-// Iter G.4. Equivalent to LookupForStage(spec, persona, StageTierEarly).
-func (s *FewShotsStore) Lookup(specialisation, learnerPersona string) ([]FewShotExample, bool) {
-	return s.LookupForStage(specialisation, learnerPersona, StageTierEarly)
-}
-
 // LookupForStage returns the 3-example slice for the (spec, persona, tier)
 // tuple, or (nil, false) when the tuple is unknown.
 //

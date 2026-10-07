@@ -20,11 +20,10 @@ import (
 //
 //  1. Loads the per-Familiar config from the registry by familiar_id.
 //  2. Validates structural invariants via ValidateConfigInvariants
-//     (cap + dedup — same checks FilterAllowedTools makes in the per-session
-//     variant; kept in lockstep).
+//     (cap + dedup — the structural invariants shared by both deploy
+//     variants; kept in lockstep).
 //  3. Translates the skill_key allowlist to actual tool.Name() values using
-//     the `available` map (the SAME map main.go passes to
-//     BuildFamiliarPerSession — single source of truth for skill_key →
+//     the `available` map (single source of truth for skill_key →
 //     tool.Tool resolution).
 //  4. Returns an InstanceConfig with the composed Instruction prompt + the
 //     translated tool name allowlist.
@@ -100,9 +99,9 @@ func NewFamiliarResolver(
 //   - len(AllowedSkills) ≤ SkillSlotsUnlocked (XP-gated capacity cap)
 //   - No duplicate skill keys in AllowedSkills
 //
-// Pure function — testable without context/registry. Used both by
-// FilterAllowedTools (per-session path; also adds presence-in-`available`
-// check) and NewFamiliarResolver (dispatch-plugin path; presence check is
+// Pure function — testable without context/registry. The per-session
+// deploy variant's filter added a presence-in-`available` check;
+// NewFamiliarResolver (dispatch-plugin path; presence check is
 // done downstream in the resolver body).
 func ValidateConfigInvariants(cfg *skillregistry.FamiliarConfig) error {
 	if cfg == nil {

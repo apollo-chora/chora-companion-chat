@@ -78,9 +78,9 @@ func TestComposeInstructionWithOverrides_AppendsToSafeBlocks(t *testing.T) {
 
 func TestComposeInstructionWithOverrides_NilAndEmptyAreByteIdentical(t *testing.T) {
 	cfg := goldenFamiliarCfg()
-	base := ComposeInstruction(cfg)
+	base := ComposeInstructionWithOverrides(cfg, nil)
 	if got := ComposeInstructionWithOverrides(cfg, nil); got != base {
-		t.Error("nil overrides must be byte-identical to ComposeInstruction")
+		t.Error("nil overrides must be byte-identical to the base rendering")
 	}
 	if got := ComposeInstructionWithOverrides(cfg, map[string]string{}); got != base {
 		t.Error("empty overrides must be byte-identical to ComposeInstruction")
@@ -89,7 +89,7 @@ func TestComposeInstructionWithOverrides_NilAndEmptyAreByteIdentical(t *testing.
 
 func TestComposeInstructionWithOverrides_LockedAndUnknownIgnored(t *testing.T) {
 	cfg := goldenFamiliarCfg()
-	base := ComposeInstruction(cfg)
+	base := ComposeInstructionWithOverrides(cfg, nil)
 	overrides := map[string]string{
 		// The 5 locked catalogue segments - never consulted.
 		"context_frame":         "LOCKED-LEAK",

@@ -171,12 +171,6 @@ func (r *StubRegistry) LoadFamiliarConfig(ctx context.Context, familiarID string
 	return &copy, nil
 }
 
-// DefaultFamiliarID returns the math Familiar — used as the warm-up RootAgent
-// specimen when the launcher needs a default agent for ListAgents().
-func DefaultFamiliarID() string {
-	return stubMathFamiliarID
-}
-
 // Canonical canned Familiars. Deterministic UUIDs so tests + sandbox runs
 // reproduce. UUIDs use the v7 "01957c8c-..." prefix from the existing tool tests.
 
