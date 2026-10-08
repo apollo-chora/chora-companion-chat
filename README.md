@@ -90,7 +90,6 @@ The main entry point is `cmd/companion_chat/main.go`. The implementation is spli
     internal/boot/            configuration, session store, dispatch wiring and plugins
     internal/skillregistry/   per-Companion configuration registry
     internal/tool/            cite_atom and weakness.read adapters
-    agent_card.yaml            A2A agent card artifact
 
 Run the same checks used by CI:
 
