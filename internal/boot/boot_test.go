@@ -50,7 +50,7 @@ func TestLoadConfig_guards(t *testing.T) {
 	}
 	minimalEnv(t)
 	cfg, err = LoadConfig()
-	if err != nil || cfg.ProjectID != "chora-test" || cfg.Model != "gemini-2.5-flash" || cfg.SessionsSchema != "companion_chat_sessions" || cfg.SessionsDSNSecretID != "chora-dev-pg-chora_ai_kernel-app_rw-dsn" {
+	if err != nil || cfg.ProjectID != "chora-test" || cfg.Model != "longcat-2.5-preview" || cfg.SessionsSchema != "companion_chat_sessions" || cfg.SessionsDSNSecretID != "chora-dev-pg-chora_ai_kernel-app_rw-dsn" {
 		t.Errorf("defaults: %+v %v", cfg, err)
 	}
 	if strings.Contains(strings.Join(func() []string {

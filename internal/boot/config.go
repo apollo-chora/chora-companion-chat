@@ -40,7 +40,7 @@ const (
 const (
 	defaultProject        = "chora-local"
 	defaultLocation       = "local"
-	defaultModel          = "gemini-2.5-flash"
+	defaultModel          = "longcat-2.5-preview"
 	defaultSessionsSchema = "companion_chat_sessions"
 )
 
