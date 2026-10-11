@@ -50,7 +50,7 @@ func TestLoadConfig_guards(t *testing.T) {
 	}
 	minimalEnv(t)
 	cfg, err = LoadConfig()
-	if err != nil || cfg.ProjectID != "chora-test" || cfg.Model != "gemini-2.5-flash" || cfg.SessionsSchema != "companion_chat_sessions" || cfg.SessionsDSNSecretID != "chora-dev-pg-chora_ai_kernel-app_rw-dsn" {
+	if err != nil || cfg.ProjectID != "chora-test" || cfg.Model != "longcat-2.5-preview" || cfg.SessionsSchema != "companion_chat_sessions" || cfg.SessionsDSNSecretID != "chora-dev-pg-chora_ai_kernel-app_rw-dsn" {
 		t.Errorf("defaults: %+v %v", cfg, err)
 	}
 	if strings.Contains(strings.Join(func() []string {
@@ -151,7 +151,7 @@ func (s *scriptedLLM) GenerateContent(_ context.Context, req *adkmodel.LLMReques
 		}
 		text := s.answers[0]
 		s.answers = s.answers[1:]
-		yield(&adkmodel.LLMResponse{Content: &genai.Content{Role: "model", Parts: []*genai.Part{{Text: text}}}, ModelVersion: "gemini-2.5-flash-001"}, nil)
+		yield(&adkmodel.LLMResponse{Content: &genai.Content{Role: "model", Parts: []*genai.Part{{Text: text}}}, ModelVersion: "longcat-2.5-preview"}, nil)
 	}
 }
 
@@ -252,7 +252,7 @@ func TestTree_typedTurnAnswersWithTheEnvelope(t *testing.T) {
 	if err := json.Unmarshal([]byte(out), &env); err != nil {
 		t.Fatalf("terminal text is not the envelope: %v %q", err, out)
 	}
-	if env.TurnKind != "typed" || env.ReplyText != "Hi! Ready to practise fractions?" || env.ModelID != "gemini-2.5-flash-001" || env.PromptSource != capp.PromptSourceEmbedded || env.PromptVersion != capp.FamiliarPromptVersion {
+	if env.TurnKind != "typed" || env.ReplyText != "Hi! Ready to practise fractions?" || env.ModelID != "longcat-2.5-preview" || env.PromptSource != capp.PromptSourceEmbedded || env.PromptVersion != capp.FamiliarPromptVersion {
 		t.Errorf("envelope = %+v", env)
 	}
 	if len(llm.calls) != 1 || !strings.Contains(systemInstruction(llm.calls[0]), "Familiar") {

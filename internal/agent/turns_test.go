@@ -81,7 +81,7 @@ func TestComposeVoiceInstruction(t *testing.T) {
 }
 
 func TestEnvelopeRender(t *testing.T) {
-	out := Envelope{TurnKind: "typed", ReplyText: "hi", ModelID: "gemini-2.5-flash", PromptVersion: "v1", PromptSource: PromptSourceEmbedded}.Render()
+	out := Envelope{TurnKind: "typed", ReplyText: "hi", ModelID: "longcat-2.5-preview", PromptVersion: "v1", PromptSource: PromptSourceEmbedded}.Render()
 	var m map[string]any
 	if err := json.Unmarshal([]byte(out), &m); err != nil {
 		t.Fatal(err)

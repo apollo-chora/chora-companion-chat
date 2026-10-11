@@ -45,7 +45,7 @@ The main configuration variables are:
 | --- | --- | --- |
 | `CHORA_PROJECT` | `chora-local` | Project label passed to the env-backed secrets client. |
 | `CHORA_LOCATION` | `local` | Location label used in boot configuration. |
-| `COMPANION_CHAT_MODEL` | `gemini-2.5-flash` | Logical model ID sent to the model gateway. |
+| `COMPANION_CHAT_MODEL` | `longcat-2.5-preview` | Logical model ID sent to the model gateway. |
 | `COMPANION_CHAT_SESSIONS_DSN_SECRET_ID` | required | Name of the secret containing the Postgres DSN. |
 | `COMPANION_CHAT_SESSIONS_SCHEMA` | `companion_chat_sessions` | Postgres schema containing the ADK session tables. |
 | `CHORA_GATEWAY_ENDPOINT` | `gateway.chora.site:443` | Model gateway gRPC endpoint. |
