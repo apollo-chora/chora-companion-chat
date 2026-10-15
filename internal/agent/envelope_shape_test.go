@@ -15,7 +15,7 @@ func TestEnvelopeGroundingAndToolCallsRenderAsObjects(t *testing.T) {
 		TurnKind: "typed", ReplyText: "hi",
 		Grounding: []GroundingRef{{AtomID: "a1", RevisionID: "r1"}},
 		ToolCalls: []ToolCallRef{{Name: "cite_atom"}},
-		ModelID:   "longcat-2.5-preview", PromptVersion: "v1", PromptSource: PromptSourceEmbedded,
+		ModelID:   "test-model", PromptVersion: "v1", PromptSource: PromptSourceEmbedded,
 	}.Render()
 
 	var m struct {

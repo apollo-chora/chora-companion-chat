@@ -32,7 +32,7 @@ func (p *partsLLM) GenerateContent(_ context.Context, req *adkmodel.LLMRequest, 
 		p.turns = p.turns[1:]
 		yield(&adkmodel.LLMResponse{
 			Content:      &genai.Content{Role: "model", Parts: parts},
-			ModelVersion: "longcat-2.5-preview",
+			ModelVersion: "test-companion-chat-model",
 		}, nil)
 	}
 }
