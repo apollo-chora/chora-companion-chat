@@ -40,7 +40,6 @@ const (
 const (
 	defaultProject        = "chora-local"
 	defaultLocation       = "local"
-	defaultModel          = "gemini-2.5-flash"
 	defaultSessionsSchema = "companion_chat_sessions"
 )
 
@@ -78,13 +77,19 @@ func EnvOr(name, fallback string) string {
 	return fallback
 }
 
-// LoadConfig resolves the boot config from env, refusing the two things the
-// process cannot run without: the gateway scope and the sessions DSN secret
-// id (a chat agent with an in-memory session store would forget the
-// conversation on every second replica, so it must not start). The project is
-// a label for secret resolution and defaults to chora-local.
+// LoadConfig resolves the boot config from env, refusing the three things the
+// process cannot run without: the gateway scope, the sessions DSN secret id
+// (a chat agent with an in-memory session store would forget the conversation
+// on every second replica, so it must not start) and the model id (env-only:
+// there is no built-in default model name). The project is a label for secret
+// resolution and defaults to chora-local.
 func LoadConfig() (Config, error) {
 	projectID := EnvOr(EnvProject, defaultProject)
+	model := strings.TrimSpace(os.Getenv(EnvModel))
+	if model == "" {
+		return Config{}, fmt.Errorf("%s: %s required: the gateway logical_model_id is env-only, "+
+			"there is no built-in default model", CrewKind, EnvModel)
+	}
 	tenantID, gcid := os.Getenv("CHORA_GATEWAY_TENANT_ID"), os.Getenv("CHORA_GATEWAY_GCID")
 	if tenantID == "" || gcid == "" {
 		return Config{}, fmt.Errorf("%s: CHORA_GATEWAY_TENANT_ID + CHORA_GATEWAY_GCID required "+
@@ -108,7 +113,7 @@ func LoadConfig() (Config, error) {
 	return Config{
 		ProjectID:           projectID,
 		Location:            EnvOr(EnvLocation, defaultLocation),
-		Model:               EnvOr(EnvModel, defaultModel),
+		Model:               model,
 		GatewayEndpoint:     EnvOr("CHORA_GATEWAY_ENDPOINT", "gateway.chora.site:443"),
 		GatewayAudience:     EnvOr("CHORA_GATEWAY_AUDIENCE", "https://gateway.chora.site"),
 		GatewayTenantID:     tenantID,
