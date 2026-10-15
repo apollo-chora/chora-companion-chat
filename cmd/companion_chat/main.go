@@ -28,7 +28,7 @@
 //
 //	CHORA_PROJECT                            project label for secret resolution (default chora-local)
 //	CHORA_LOCATION                           location label (default local)
-//	COMPANION_CHAT_MODEL                     default longcat-2.5-preview
+//	COMPANION_CHAT_MODEL                     required: the gateway logical_model_id (env-only, no built-in default)
 //	COMPANION_CHAT_SESSIONS_DSN_SECRET_ID    required: env-backed secret name of the Postgres DSN for the ADK session store
 //	COMPANION_CHAT_SESSIONS_SCHEMA           default companion_chat_sessions (search_path; dedicated schema in chora_ai_kernel)
 //	CHORA_GATEWAY_ENDPOINT                   default gateway.chora.site:443
